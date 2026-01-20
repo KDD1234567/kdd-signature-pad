@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KDD Digital Signature Pad</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        #signature-pad {
+            border: 2px solid #000;
+            background: #ffffff;
+            width: 100%;
+            max-width: 400px;
+            height: 200px;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>KDD Training – Digital Signature</h2>
+    <p>Please sign in the box below, then click Save.</p>
+
+    <canvas id="signature-pad"></canvas><br>
+
+    <button onclick="clearPad()">Clear</button>
+    <button onclick="saveSignature()">Save</button>
+
+    <p>After saving, upload the downloaded signature image back into the attendance form.</p>
+
+<script>
+    var canvas = document.getElementById('signature-pad');
+    var ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        ctx.scale(ratio, ratio);
+    }
+
+    resizeCanvas();
+    window.onresize = resizeCanvas;
+
+    let drawing = false;
+
+    function getPos(event) {
+        var rect = canvas.getBoundingClientRect();
+        var x = (event.clientX || event.touches[0].clientX) - rect.left;
+        var y = (event.clientY || event.touches[0].clientY) - rect.top;
+        return {x, y};
+    }
+
+    canvas.addEventListener('mousedown', () => drawing = true);
+    canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
+    canvas.addEventListener('mousemove', draw);
+
+    canvas.addEventListener('touchstart', () => drawing = true);
+    canvas.addEventListener('touchend', () => { drawing = false; ctx.beginPath(); });
+    canvas.addEventListener('touchmove', draw);
+
+    function draw(event) {
+        event.preventDefault();
+        if (!drawing) return;
+
+        const pos = getPos(event);
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000';
+
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    }
+
+    function clearPad() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function saveSignature() {
+        var dataURL = canvas.toDataURL('image/png');
+
+        // Trigger download
+        var link = document.createElement('a');
+        link.href = dataURL;
+        link.download = 'KDD_Signature.png';
+        link.click();
+
+        alert("Signature saved. Please upload it in the attendance form.");
+    }
+</script>
+
+</body>
+</html>
